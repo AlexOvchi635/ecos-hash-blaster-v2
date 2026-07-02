@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hash Blaster v2 — экономика (10 уровней)</title>
+  <style>
+    :root{
+      --bg:#f4f7fb; --card:#fff; --ink:#0f172a; --muted:#64748b; --line:#e6ecf3;
+      --orange:#ea580c; --orange-soft:#fff7ed; --orange-line:#fed7aa;
+      --blue:#2563eb; --gold:#ca8a04; --gold-soft:#fefce8; --violet:#7c3aed; --violet-soft:#f5f1fe; --green:#16a34a;
+      --sh:0 10px 30px rgba(15,23,42,.06);
+    }
+    *{box-sizing:border-box;}
+    body{margin:0;font-family:Inter,-apple-system,"Segoe UI",Arial,sans-serif;background:radial-gradient(circle at top,#fff 0,var(--bg) 55%);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5;}
+    .wrap{max-width:780px;margin:0 auto;padding:32px 20px 60px;}
+    .head{text-align:center;margin-bottom:28px;}
+    .head h1{margin:0 0 6px;font-size:32px;font-weight:900;letter-spacing:-.03em;}
+    .head p{margin:0;color:var(--muted);font-size:15px;}
+    .head .pill{display:inline-block;margin-bottom:12px;padding:5px 12px;border-radius:999px;background:var(--orange-soft);border:1px solid var(--orange-line);color:var(--orange);font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;}
+    .hero{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+    .big{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 10px;text-align:center;box-shadow:var(--sh);}
+    .big .n{font-size:28px;font-weight:900;line-height:1;letter-spacing:-.03em;}
+    .big .n.o{color:var(--orange);} .big .n.b{color:var(--blue);} .big .n.g{color:var(--gold);} .big .n.v{color:var(--violet);}
+    .big .l{margin-top:7px;font-size:11px;color:var(--muted);font-weight:600;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--sh);margin-bottom:16px;}
+    .card h2{margin:0 0 4px;font-size:19px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:8px;}
+    .card .sub{margin:0 0 14px;color:var(--muted);font-size:13px;}
+    .facts{display:grid;gap:10px;}
+    .fact{display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid var(--line);border-radius:13px;background:#fbfdff;}
+    .fact .ic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0;background:var(--orange-soft);color:var(--orange);}
+    .fact .tx{font-size:14px;} .fact .tx b{font-weight:800;} .fact .tx small{display:block;color:var(--muted);font-size:12px;margin-top:1px;}
+    .prog{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:4px;}
+    .pstep{border:1px solid var(--line);border-radius:11px;padding:9px 3px;text-align:center;background:#fbfdff;}
+    .pstep .lv{font-size:9px;font-weight:800;color:var(--muted);}
+    .pstep .val{font-size:13px;font-weight:900;margin-top:3px;line-height:1.1;}
+    .pstep.gun .val{color:var(--orange);}
+    .pstep.pow{background:var(--violet-soft);border-color:#ddd6fe;}
+    .pstep.pow .val{color:var(--violet);}
+    table{width:100%;border-collapse:collapse;font-size:14px;}
+    th,td{padding:10px 7px;text-align:left;border-bottom:1px solid var(--line);}
+    th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:800;}
+    td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;}
+    tr:last-child td{border-bottom:none;}
+    .lvl-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:8px;font-weight:900;font-size:13px;background:#eef3f9;color:var(--ink);}
+    .rw{font-weight:800;color:var(--gold);}
+    .total td{font-weight:900;color:var(--orange);border-bottom:none;background:var(--orange-soft);}
+    .callout{margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--orange-soft);border:1px solid var(--orange-line);color:#9a3412;font-size:13px;font-weight:600;line-height:1.5;}
+    .callout.green{background:#f0fdf4;border-color:#bbf7d0;color:#166534;}
+    .foot{text-align:center;margin-top:24px;color:var(--muted);font-size:13px;}
+    .foot a{color:var(--orange);font-weight:800;text-decoration:none;}
+    @media (max-width:560px){ .hero{grid-template-columns:1fr 1fr;} .prog{grid-template-columns:repeat(5,1fr);} .head h1{font-size:26px;} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="head">
+      <span class="pill">Экономика · версия 2</span>
+      <h1>Hash Blaster · 10 уровней</h1>
+      <p>Без пасса. Билеты падают с <b>каждого</b> босса. Кликер даёт MP → в игре жжёшь → копишь билеты.</p>
+    </div>
+
+    <div class="hero">
+      <div class="big"><div class="n o">1</div><div class="l">MP за выстрел</div></div>
+      <div class="big"><div class="n b">10</div><div class="l">уровней</div></div>
+      <div class="big"><div class="n g">55</div><div class="l">🎟 за полное прохождение</div></div>
+      <div class="big"><div class="n v">~<span id="reserve">—</span></div><div class="l">MP сжечь за игру</div></div>
+    </div>
+
+    <!-- Progression -->
+    <div class="card">
+      <h2>🔫 Прокачка — фиксированная</h2>
+      <p class="sub"><b>1 буст на уровень.</b> Уровни 1–4 добавляют пушки (до 5), уровни 5–10 удваивают урон. Эффект сохраняется — босс всегда убивается за ~30 выстрелов.</p>
+      <div class="prog" id="prog"></div>
+    </div>
+
+    <!-- Box types -->
+    <div class="card">
+      <h2>📦 Типы боксов</h2>
+      <p class="sub">Много боксов, падают быстро (+20%, ещё +8%/уровень). Стреляй по синим, красные пропускай.</p>
+      <div class="facts">
+        <div class="fact"><div class="ic" style="background:#eff5ff;color:var(--blue)">💎</div><div class="tx"><b>Синий = +1–3 MP</b> (чаще 1)<small>Сбивай. Пропустил вниз — проигрыш</small></div></div>
+        <div class="fact"><div class="ic" style="background:#fef2f2;color:#dc2626">✕</div><div class="tx"><b>Красный = −1…−5 MP</b><small>НЕ стреляй. Пролетает вниз без штрафа</small></div></div>
+        <div class="fact"><div class="ic">💨</div><div class="tx"><b>~18% блоков вдвое быстрее</b> · <b>🧱 отскок от стен</b><small>Урон только в HIT ZONE (не сбить вслепую сверху)</small></div></div>
+      </div>
+    </div>
+
+    <!-- Rewards -->
+    <div class="card">
+      <h2>🎟 Награды — билеты с каждого босса</h2>
+      <p class="sub">Пасса нет. Каждый босс роняет билеты = номер уровня (1 → 10). За полное прохождение — <b>55 билетов</b>.</p>
+      <div class="facts">
+        <div class="fact"><div class="ic" style="background:var(--gold-soft);color:var(--gold)">🎟</div><div class="tx"><b>Босс уровня N → N билетов</b><small>L1=1, L2=2, … L10=10</small></div></div>
+        <div class="fact"><div class="ic">🏆</div><div class="tx"><b>Прошёл все 10 → победа</b> + банк билетов<small>Умер — билеты забега сгорают. «Bank &amp; exit» — в сейф</small></div></div>
+      </div>
+    </div>
+
+    <!-- Levels table -->
+    <div class="card">
+      <h2>📊 Уровни и стоимость</h2>
+      <p class="sub">HP растёт вместе с уроном → каждый босс ~30 выстрелов. Внизу — сколько MP сжечь на всю игру.</p>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Ур.</th><th class="num">HP</th><th>Буст</th><th class="num">~выстр.</th><th class="num">~MP</th><th class="num">🎟</th></tr></thead>
+        <tbody id="lvlBody"></tbody>
+        <tfoot><tr class="total"><td colspan="4">Сжечь за всю игру</td><td class="num" id="totalMp">—</td><td class="num">55</td></tr></tfoot>
+      </table>
+      </div>
+      <div class="callout green">Один забег жжёт <b>~<span id="burn2">—</span> MP</b> и почти ничего не возвращает. Новичок в кликере зарабатывает <b>~50–300 MP/день</b> — игра съедает несколько дней дохода. <b>Кликер копит — игра тратит.</b></div>
+    </div>
+
+    <div class="foot">Отдельная версия v2 (без ассетов, 10 уровней, без пасса) · <a href="btc-miner-arcade-v2.html">▶ Играть</a></div>
+  </div>
+
+  <script>
+    // ── same constants as btc-miner-arcade-v2.html ──
+    var BOSS_HP=[0,60,90,120,150,300,560,1120,2240,4480,9000];
+    var TICKETS=[0,1,2,3,4,5,6,7,8,9,10];
+    var MAX=10, BASE=18, SCALE=2, RET=1.5, GUN_MAX=5;
+    function drops(w){ return BASE+w*SCALE; }
+    function power(w){ var guns=Math.min(GUN_MAX,1+w), dmg=1; for(var i=5;i<=w;i++) dmg*=2; return {guns:guns,dmg:dmg}; }
+    function shots(w){ var p=power(w); return Math.ceil(BOSS_HP[w]/(p.guns*p.dmg)) + Math.round(drops(w)*2.4); }
+    function net(w){ return shots(w)-drops(w)*RET; }
+
+    var prog='';
+    for(var w=1;w<=MAX;w++){
+      var p=power(w), isGun=w<=4;
+      prog+='<div class="pstep '+(isGun?'gun':'pow')+'"><div class="lv">'+w+'</div><div class="val">'+(isGun?('🔫'+p.guns):('⚡×'+p.dmg))+'</div></div>';
+    }
+    document.getElementById('prog').innerHTML=prog;
+
+    var total=0, body='';
+    for(var w=1;w<=MAX;w++){
+      var p=power(w), n=net(w); total+=n;
+      var boost=w<=4?('🔫→'+p.guns):('⚡×'+p.dmg);
+      body+='<tr><td><span class="lvl-badge">'+w+'</span></td><td class="num">'+BOSS_HP[w].toLocaleString('ru-RU')+'</td><td>'+boost+'</td><td class="num">~'+shots(w)+'</td><td class="num">~'+Math.max(0,Math.round(n))+'</td><td class="num rw">'+TICKETS[w]+'</td></tr>';
+    }
+    document.getElementById('lvlBody').innerHTML=body;
+    var totalR=Math.round(total/10)*10;
+    document.getElementById('totalMp').textContent='~'+totalR.toLocaleString('ru-RU');
+    document.getElementById('reserve').textContent=totalR.toLocaleString('ru-RU');
+    document.getElementById('burn2').textContent=totalR.toLocaleString('ru-RU');
+  </script>
+</body>
+</html>
