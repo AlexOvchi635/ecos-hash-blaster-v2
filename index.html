@@ -440,9 +440,9 @@ const ECO = {
   RAFFLE_LEVEL:7, RAFFLE_CHANCE:0.07,             // pass: each of the 2 final bosses rolls 7% (~13.5%/run) — target ~250/500 over a month
 };
 // 10 finite levels. Multi-boss waves (see BOSSES_PER_WAVE). PER-BOSS HP tuned so each WAVE ≈ 100 shots on the power curve below.
-const BOSS_HP          = [0, 200, 150, 400, 500, 1000, 500, 1000, 500, 1500, 500];  // PER BOSS, index by level 1..10
-// Deterministic power per LEVEL: guns 2→5 (L1-4, +×2 dmg on L4), then flat dmg ramp ×2 (L4-8), ×3 (L9-10)
-const POWER            = [null,{g:2,d:1},{g:3,d:1},{g:4,d:1},{g:5,d:2},{g:5,d:2},{g:5,d:2},{g:5,d:2},{g:5,d:2},{g:5,d:3},{g:5,d:3}];
+const BOSS_HP          = [0, 200, 150, 400, 500, 1000, 750, 1500, 750, 1500, 500];  // PER BOSS, index by level 1..10
+// Deterministic power per LEVEL: guns 2→5 (L1-4, +×2 dmg on L4), then dmg ×2 (L4-5), ×3 (L6-10)
+const POWER            = [null,{g:2,d:1},{g:3,d:1},{g:4,d:1},{g:5,d:2},{g:5,d:2},{g:5,d:3},{g:5,d:3},{g:5,d:3},{g:5,d:3},{g:5,d:3}];
 function powerFor(w){ return POWER[Math.min(w, ECO.MAX_LEVEL)]; }
 function bossHpForWave(w){ return BOSS_HP[Math.min(w, ECO.MAX_LEVEL)]; }
 
