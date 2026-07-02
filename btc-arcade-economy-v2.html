@@ -13,14 +13,14 @@
     }
     *{box-sizing:border-box;}
     body{margin:0;font-family:Inter,-apple-system,"Segoe UI",Arial,sans-serif;background:radial-gradient(circle at top,#fff 0,var(--bg) 55%);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5;}
-    .wrap{max-width:780px;margin:0 auto;padding:32px 20px 60px;}
+    .wrap{max-width:800px;margin:0 auto;padding:32px 20px 60px;}
     .head{text-align:center;margin-bottom:28px;}
     .head h1{margin:0 0 6px;font-size:32px;font-weight:900;letter-spacing:-.03em;}
     .head p{margin:0;color:var(--muted);font-size:15px;}
     .head .pill{display:inline-block;margin-bottom:12px;padding:5px 12px;border-radius:999px;background:var(--orange-soft);border:1px solid var(--orange-line);color:var(--orange);font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;}
     .hero{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
     .big{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 10px;text-align:center;box-shadow:var(--sh);}
-    .big .n{font-size:28px;font-weight:900;line-height:1;letter-spacing:-.03em;}
+    .big .n{font-size:26px;font-weight:900;line-height:1;letter-spacing:-.03em;}
     .big .n.o{color:var(--orange);} .big .n.b{color:var(--blue);} .big .n.g{color:var(--gold);} .big .n.v{color:var(--violet);}
     .big .l{margin-top:7px;font-size:11px;color:var(--muted);font-weight:600;}
     .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--sh);margin-bottom:16px;}
@@ -37,13 +37,17 @@
     .pstep.gun .val{color:var(--orange);}
     .pstep.pow{background:var(--violet-soft);border-color:#ddd6fe;}
     .pstep.pow .val{color:var(--violet);}
+    .bosses .val{font-size:14px;color:var(--ink);letter-spacing:-1px;}
+    .bosses .pstep.two{background:var(--orange-soft);border-color:var(--orange-line);}
+    .bosses .pstep.three{background:#fee2e2;border-color:#fecaca;}
     table{width:100%;border-collapse:collapse;font-size:14px;}
-    th,td{padding:10px 7px;text-align:left;border-bottom:1px solid var(--line);}
-    th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:800;}
+    th,td{padding:10px 6px;text-align:left;border-bottom:1px solid var(--line);}
+    th{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:800;}
     td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;}
     tr:last-child td{border-bottom:none;}
     .lvl-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:8px;font-weight:900;font-size:13px;background:#eef3f9;color:var(--ink);}
-    .rw{font-weight:800;color:var(--gold);}
+    .rw{font-weight:800;color:var(--gold);white-space:nowrap;}
+    .rw.chance{color:var(--muted);font-weight:700;}
     .total td{font-weight:900;color:var(--orange);border-bottom:none;background:var(--orange-soft);}
     .callout{margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--orange-soft);border:1px solid var(--orange-line);color:#9a3412;font-size:13px;font-weight:600;line-height:1.5;}
     .callout.green{background:#f0fdf4;border-color:#bbf7d0;color:#166534;}
@@ -58,21 +62,28 @@
     <div class="head">
       <span class="pill">Экономика · версия 2</span>
       <h1>Hash Blaster · 10 уровней</h1>
-      <p>Без пасса. Билеты падают с <b>каждого</b> босса. Кликер даёт MP → в игре жжёшь → копишь билеты.</p>
+      <p>Пасса нет. Боссы идут <b>1·2·1·2…3</b>. Билеты выпадают <b>раз за уровень</b> — сначала по шансу, потом гарантированно.</p>
     </div>
 
     <div class="hero">
       <div class="big"><div class="n o">1</div><div class="l">MP за выстрел</div></div>
-      <div class="big"><div class="n b">10</div><div class="l">уровней</div></div>
-      <div class="big"><div class="n g">55</div><div class="l">🎟 за полное прохождение</div></div>
-      <div class="big"><div class="n v">~<span id="reserve">—</span></div><div class="l">MP сжечь за игру</div></div>
+      <div class="big"><div class="n b">16</div><div class="l">боссов за 10 уровней</div></div>
+      <div class="big"><div class="n g">~<span id="avgTix">—</span></div><div class="l">🎟 в среднем за забег<br>(min 9 · max 15)</div></div>
+      <div class="big"><div class="n v">~<span id="netBurn">—</span></div><div class="l">MP чистого слива<br>(≈<span id="grossBurn">—</span> потрачено)</div></div>
     </div>
 
     <!-- Progression -->
     <div class="card">
       <h2>🔫 Прокачка — фиксированная</h2>
-      <p class="sub"><b>1 буст на уровень.</b> Уровни 1–4 добавляют пушки (до 5), уровни 5–10 удваивают урон. Эффект сохраняется — босс всегда убивается за ~30 выстрелов.</p>
+      <p class="sub"><b>1 буст на уровень.</b> Уровни 1–4 добавляют пушки (до 5), уровни 5–10 удваивают урон. Эффект сохраняется — любая волна закрывается за ~25 выстрелов.</p>
       <div class="prog" id="prog"></div>
+    </div>
+
+    <!-- Boss layout -->
+    <div class="card">
+      <h2>👾 Сколько боссов на уровне</h2>
+      <p class="sub">Чередование <b>1 / 2</b>, тройка только на финале. Все боссы уровня появляются разом — уровень зачтён, когда убиты все.</p>
+      <div class="prog bosses" id="bossRow"></div>
     </div>
 
     <!-- Box types -->
@@ -88,10 +99,11 @@
 
     <!-- Rewards -->
     <div class="card">
-      <h2>🎟 Награды — билеты с каждого босса</h2>
-      <p class="sub">Пасса нет. Каждый босс роняет билеты = номер уровня (1 → 10). За полное прохождение — <b>55 билетов</b>.</p>
+      <h2>🎟 Награды — билеты раз за уровень</h2>
+      <p class="sub">Билет разыгрывается один раз при закрытии уровня (не с каждого босса). Ранние уровни — по шансу, поздние — гарантированно.</p>
       <div class="facts">
-        <div class="fact"><div class="ic" style="background:var(--gold-soft);color:var(--gold)">🎟</div><div class="tx"><b>Босс уровня N → N билетов</b><small>L1=1, L2=2, … L10=10</small></div></div>
+        <div class="fact"><div class="ic" style="background:var(--gold-soft);color:var(--gold)">🎲</div><div class="tx"><b>Уровни 1–5 — по шансу</b><small>L1 20% · L2 40% · L3 50% · L4 50% → 1 билет. L5: 0/1/2 (25/50/25%)</small></div></div>
+        <div class="fact"><div class="ic" style="background:var(--gold-soft);color:var(--gold)">🎟</div><div class="tx"><b>Уровни 6–10 — гарантированно</b><small>L6=1 · L7=1 · L8=2 · L9=2 · L10=3</small></div></div>
         <div class="fact"><div class="ic">🏆</div><div class="tx"><b>Прошёл все 10 → победа</b> + банк билетов<small>Умер — билеты забега сгорают. «Bank &amp; exit» — в сейф</small></div></div>
       </div>
     </div>
@@ -99,15 +111,17 @@
     <!-- Levels table -->
     <div class="card">
       <h2>📊 Уровни и стоимость</h2>
-      <p class="sub">HP растёт вместе с уроном → каждый босс ~30 выстрелов. Внизу — сколько MP сжечь на всю игру.</p>
+      <p class="sub">HP всего = боссы × HP босса. Растёт вместе с уроном → каждая волна ~25 выстрелов по боссам. Внизу — сколько MP уходит за всю игру.</p>
       <div style="overflow-x:auto">
       <table>
-        <thead><tr><th>Ур.</th><th class="num">HP</th><th>Буст</th><th class="num">~выстр.</th><th class="num">~MP</th><th class="num">🎟</th></tr></thead>
+        <thead><tr><th>Ур.</th><th class="num">Боссы</th><th class="num">HP всего</th><th>Буст</th><th class="num">~выстр.</th><th class="num">~MP</th><th>🎟</th></tr></thead>
         <tbody id="lvlBody"></tbody>
-        <tfoot><tr class="total"><td colspan="4">Сжечь за всю игру</td><td class="num" id="totalMp">—</td><td class="num">55</td></tr></tfoot>
+        <tfoot>
+          <tr class="total"><td colspan="4">Потрачено MP за игру</td><td class="num" id="totShots">—</td><td class="num" id="totMp">—</td><td>~<span id="totTix">—</span></td></tr>
+        </tfoot>
       </table>
       </div>
-      <div class="callout green">Один забег жжёт <b>~<span id="burn2">—</span> MP</b> и почти ничего не возвращает. Новичок в кликере зарабатывает <b>~50–300 MP/день</b> — игра съедает несколько дней дохода. <b>Кликер копит — игра тратит.</b></div>
+      <div class="callout green">Забег тратит <b>~<span id="grossBurn2">—</span> MP</b> и возвращает часть на блоках → <b>чистый слив ~<span id="netBurn2">—</span> MP</b>. Новичок в кликере зарабатывает <b>~50–300 MP/день</b> — один забег съедает около дня дохода. <b>Кликер копит — игра тратит.</b></div>
     </div>
 
     <div class="foot">Отдельная версия v2 (без ассетов, 10 уровней, без пасса) · <a href="btc-miner-arcade-v2.html">▶ Играть</a></div>
@@ -115,32 +129,69 @@
 
   <script>
     // ── same constants as btc-miner-arcade-v2.html ──
-    var BOSS_HP=[0,60,90,120,150,300,560,1120,2240,4480,9000];
-    var TICKETS=[0,1,2,3,4,5,6,7,8,9,10];
-    var MAX=10, BASE=18, SCALE=2, RET=1.5, GUN_MAX=5;
+    var BOSS_HP = [0,50,40,100,60,240,250,960,960,3840,2560];   // PER BOSS
+    var BOSSES  = [0,1,2,1,2,1,2,1,2,1,3];                       // count per level
+    var MAX=10, BASE=18, SCALE=2, GUN_MAX=5;
+    // ticket rule per level: label + expected value
+    var TIX = [ null,
+      {lab:'20% → 1', e:0.2, chance:true},
+      {lab:'40% → 1', e:0.4, chance:true},
+      {lab:'50% → 1', e:0.5, chance:true},
+      {lab:'50% → 1', e:0.5, chance:true},
+      {lab:'0/1/2',   e:1.0, chance:true},
+      {lab:'1',       e:1,   chance:false},
+      {lab:'1',       e:1,   chance:false},
+      {lab:'2',       e:2,   chance:false},
+      {lab:'2',       e:2,   chance:false},
+      {lab:'3',       e:3,   chance:false}
+    ];
     function drops(w){ return BASE+w*SCALE; }
-    function power(w){ var guns=Math.min(GUN_MAX,1+w), dmg=1; for(var i=5;i<=w;i++) dmg*=2; return {guns:guns,dmg:dmg}; }
-    function shots(w){ var p=power(w); return Math.ceil(BOSS_HP[w]/(p.guns*p.dmg)) + Math.round(drops(w)*2.4); }
-    function net(w){ return shots(w)-drops(w)*RET; }
+    function power(w){ var g=Math.min(GUN_MAX,1+w), d=1; for(var i=5;i<=w;i++) d*=2; return {g:g,d:d,p:g*d}; }
+    function satCount(w){ return Math.max(0,Math.min(3,w-2)); }
+    function totHp(w){ return BOSSES[w]*BOSS_HP[w]; }
+    function bossShots(w){ var p=power(w).p, shieldHp=BOSSES[w]*satCount(w)*(2+Math.floor(w/4)); return Math.ceil((totHp(w)+shieldHp)/p); }
+    function waveShots(w){ return bossShots(w) + Math.round(drops(w)*0.72) + 1; }        // boss + blue boxes + boost box
+    function waveNet(w){ var blue=Math.round(drops(w)*0.72); var blockNet=blue*1.5-(blue+1); return blockNet - bossShots(w) + BOSSES[w]*satCount(w)*1; }
 
+    // progression strip
     var prog='';
-    for(var w=1;w<=MAX;w++){
-      var p=power(w), isGun=w<=4;
-      prog+='<div class="pstep '+(isGun?'gun':'pow')+'"><div class="lv">'+w+'</div><div class="val">'+(isGun?('🔫'+p.guns):('⚡×'+p.dmg))+'</div></div>';
-    }
+    for(var w=1;w<=MAX;w++){ var p=power(w), isGun=w<=4;
+      prog+='<div class="pstep '+(isGun?'gun':'pow')+'"><div class="lv">'+w+'</div><div class="val">'+(isGun?('🔫'+p.g):('⚡×'+p.d))+'</div></div>'; }
     document.getElementById('prog').innerHTML=prog;
 
-    var total=0, body='';
+    // boss-count strip
+    var brow='';
+    for(var w=1;w<=MAX;w++){ var n=BOSSES[w], cls=n===3?'three':(n===2?'two':'');
+      brow+='<div class="pstep '+cls+'"><div class="lv">'+w+'</div><div class="val">'+('👾'.repeat(n))+'</div></div>'; }
+    document.getElementById('bossRow').innerHTML=brow;
+
+    // levels table + totals
+    var gross=0, net=0, eTix=0, body='';
     for(var w=1;w<=MAX;w++){
-      var p=power(w), n=net(w); total+=n;
-      var boost=w<=4?('🔫→'+p.guns):('⚡×'+p.dmg);
-      body+='<tr><td><span class="lvl-badge">'+w+'</span></td><td class="num">'+BOSS_HP[w].toLocaleString('ru-RU')+'</td><td>'+boost+'</td><td class="num">~'+shots(w)+'</td><td class="num">~'+Math.max(0,Math.round(n))+'</td><td class="num rw">'+TICKETS[w]+'</td></tr>';
+      var p=power(w), ws=waveShots(w), wn=waveNet(w), t=TIX[w];
+      gross+=ws; net+=wn; eTix+=t.e;
+      var boost = w<=4 ? ('🔫→'+p.g) : ('⚡×'+p.d);
+      body+='<tr>'+
+        '<td><span class="lvl-badge">'+w+'</span></td>'+
+        '<td class="num">'+BOSSES[w]+'</td>'+
+        '<td class="num">'+totHp(w).toLocaleString('ru-RU')+'</td>'+
+        '<td>'+boost+'</td>'+
+        '<td class="num">~'+ws+'</td>'+
+        '<td class="num">'+(wn<0?'−':'+')+Math.abs(Math.round(wn))+'</td>'+
+        '<td class="rw'+(t.chance?' chance':'')+'">'+t.lab+'</td>'+
+      '</tr>';
     }
     document.getElementById('lvlBody').innerHTML=body;
-    var totalR=Math.round(total/10)*10;
-    document.getElementById('totalMp').textContent='~'+totalR.toLocaleString('ru-RU');
-    document.getElementById('reserve').textContent=totalR.toLocaleString('ru-RU');
-    document.getElementById('burn2').textContent=totalR.toLocaleString('ru-RU');
+
+    var grossR=Math.round(gross/10)*10, netR=Math.round(-net/10)*10, tixR=eTix.toFixed(1);
+    document.getElementById('avgTix').textContent=tixR;
+    document.getElementById('totTix').textContent=tixR;
+    document.getElementById('netBurn').textContent=netR;
+    document.getElementById('netBurn2').textContent=netR;
+    document.getElementById('grossBurn').textContent=grossR;
+    document.getElementById('grossBurn2').textContent=grossR;
+    document.getElementById('totShots').textContent='~'+grossR;
+    document.getElementById('totMp').textContent='−'+netR;
   </script>
 </body>
 </html>

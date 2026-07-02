@@ -120,6 +120,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   background:rgba(15,23,42,.34);z-index:20;backdrop-filter:blur(3px);
 }
 .overlay.flex{display:flex;}
+#bigwin{align-items:flex-start;padding-top:7vh;}   /* bank/continue near the TOP — away from the shooting thumb */
 .box{
   position:relative;background:var(--card);border:1px solid var(--line);
   border-radius:20px;padding:22px 24px;text-align:center;
@@ -289,7 +290,7 @@ body.shake{animation:shake .12s linear infinite;}
   <div class="stat burn" id="statBurn">🔥 <b id="burned">0</b></div>
 </div>
 
-<div id="ticketHint">🎟 Tickets drop from every boss</div>
+<div id="ticketHint">🎟 Clear levels to earn tickets</div>
 <div id="toast"></div>
 <div id="warning"><div id="warningText">⚠ BOSS ⚠</div></div>
 
@@ -438,12 +439,32 @@ const ECO = {
   MP_BOX_MIN:1, MP_BOX_MAX:3, SAT_MP:1,           // box returns 1–3 MP (mostly 1) — burn more MP
   RAFFLE_LEVEL:7, RAFFLE_CHANCE:0.07,             // pass: each of the 2 final bosses rolls 7% (~13.5%/run) — target ~250/500 over a month
 };
-// 7 finite levels — boss HP tuned to the FIXED power curve (guns 2→3→4, then dmg ×2). Early bosses easy, ramp 36→70 shots.
-const BOSS_HP          = [0, 60, 90, 120, 150, 300, 560, 1120, 2240, 4480, 9000];  // index by level 1..10
-const EARLY_TIX_CHANCE = [0, 0.01, 0.02, 0.03, 0.05];             // L1-4 hidden ticket drop chance (see economy doc)
-const TICKETS_BY_LEVEL = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];       // tickets from every boss = level
+// 10 finite levels. Multi-boss waves (see BOSSES_PER_WAVE). PER-BOSS HP tuned so each WAVE ≈ 24-26 shots on the fixed power curve.
+const BOSS_HP          = [0, 50, 40, 100, 60, 240, 250, 960, 960, 3840, 2560];  // PER BOSS, index by level 1..10
 function bossHpForWave(w){ return BOSS_HP[Math.min(w, ECO.MAX_LEVEL)]; }
-function bossTixForWave(w){ return TICKETS_BY_LEVEL[Math.min(w, ECO.MAX_LEVEL)] || 0; }
+
+// Boss count per level — alternating 1/2, triple on the finale
+const BOSSES_PER_WAVE  = [0, 1, 2, 1, 2, 1, 2, 1, 2, 1, 3];
+
+// Tickets rolled ONCE per level on clear. Chance-based early, guaranteed late.
+//  L1 20%→1 · L2 40%→1 · L3/L4 50%→1 · L5 0/1/2 (25/50/25) · L6 1 · L7 1 · L8 2 · L9 2 · L10 3
+function rollTickets(w){
+  switch(w){
+    case 1: return Math.random()<0.20?1:0;
+    case 2: return Math.random()<0.40?1:0;
+    case 3: return Math.random()<0.50?1:0;
+    case 4: return Math.random()<0.50?1:0;
+    case 5: { const r=Math.random(); return r<0.25?0:(r<0.75?1:2); }
+    case 6: return 1;
+    case 7: return 1;
+    case 8: return 2;
+    case 9: return 2;
+    case 10:return 3;
+    default:return 0;
+  }
+}
+const TICKET_MAX = [0,1,1,1,1,2,1,1,2,2,3];                        // best-case tickets per level (for the hint)
+function ticketMaxForWave(w){ return TICKET_MAX[Math.min(w, ECO.MAX_LEVEL)] || 0; }
 function raffleChanceForWave(w){ return w===ECO.RAFFLE_LEVEL ? ECO.RAFFLE_CHANCE : 0; }
 function raffleChanceWithPity(w){ return raffleChanceForWave(w); }
 
@@ -520,7 +541,7 @@ const bossTiers = [
   {name:'ROYAL',   c1:'#e0e7ff',c2:'#4f46e5',c3:'#312e81',glow:'#6366f1'},
   {name:'ECLIPSE', c1:'#fed7aa',c2:'#c2410c',c3:'#431407',glow:'#ea580c'},
 ];
-function bossesPerWave(w){ return 1; }   // one boss per level
+function bossesPerWave(w){ return BOSSES_PER_WAVE[Math.min(w, ECO.MAX_LEVEL)] || 1; }   // 1,2,1,2…3
 
 function spawnBoss(){
   if(state.bossActive) return;
@@ -553,10 +574,9 @@ function actuallySpawnBoss(){
 
 let ticketHintTO;
 function showTicketHint(){
-  const tix=bossTixForWave(state.wave);
-  let msg='';
-  if(tix>0) msg=`🎟 Boss drops ${tix} tickets`;
-  else return;
+  const w=state.wave, mx=ticketMaxForWave(w);
+  if(mx<=0) return;
+  const msg = w>=6 ? ('🎟 +'+mx+' on clear') : ('🎟 up to '+mx+' (chance)');
   const el=document.getElementById('ticketHint');
   el.textContent=msg; el.classList.add('show'); clearTimeout(ticketHintTO);
   ticketHintTO=setTimeout(()=>el.classList.remove('show'),3500);
@@ -631,13 +651,8 @@ function hitSatellite(s,hx,hy){
   }
 }
 
-// BOSS DEATH — fixed tickets per level, then Lvl-5 raffle roll
+// BOSS DEATH — FX + counters only (tickets are rolled once per LEVEL in onWaveCleared)
 function onBossDeath(b){
-  const tix=bossTixForWave(state.wave);   // tickets from every boss (= level)
-  if(tix>0){
-    state.tix+=tix; state.totalTIXEarned+=tix;
-    addFloater(b.x,b.y,'+'+tix+' 🎟',C.tix); explodeMP(b.x,b.y,C.tix,28);
-  }
   state.totalBossesKilled++; state.bossesKilledThisRun++;
   explodeMP(b.x,b.y,C.orange,34); spawnFirework(b.x,b.y,C.o1);
 }
@@ -646,14 +661,17 @@ function onBossDeath(b){
 function onWaveCleared(){
   state.totalWavesCleared++;
   state.bossActive=false;
+  const gain=rollTickets(state.wave);                 // roll tickets ONCE per level
+  if(gain>0){ state.tix+=gain; state.totalTIXEarned+=gain; }
   if(state.wave>=ECO.MAX_LEVEL){ triggerWin(); return; }
   const tier=bossTiers[Math.min(bossTiers.length-1,state.wave-1)];
   document.getElementById('bwEyebrow').textContent=tier.name+' CLEARED · Lvl '+state.wave+'/'+ECO.MAX_LEVEL;
   document.getElementById('bwTitle').textContent='Level '+state.wave+' clear';
-  document.getElementById('bwText').innerHTML = state.tix>0
-    ? `🎟 <b>${state.tix}</b> tickets earned this run<br><span style="color:var(--muted);font-size:12px">Next: Level ${state.wave+1} of ${ECO.MAX_LEVEL}</span>`
-    : `Boss down! <span style="color:var(--muted);font-size:12px">Next: Level ${state.wave+1} of ${ECO.MAX_LEVEL}</span>`;
+  document.getElementById('bwText').innerHTML =
+    (gain>0 ? `🎟 <b>+${gain}</b> this level · ` : `No ticket this level · `)+
+    `total <b>${state.tix}</b> 🎟<br><span style="color:var(--muted);font-size:12px">Next: Level ${state.wave+1} of ${ECO.MAX_LEVEL}</span>`;
   document.getElementById('bigwin').classList.add('flex'); pushPause('bigwin');
+  state.bwArmed=false; setTimeout(()=>{ state.bwArmed=true; },800);    // ignore stray shooting taps for 0.8s
   for(let i=0;i<8;i++) setTimeout(()=>spawnFirework(rand(W*.18,W*.82),rand(H*.22,H*.5),[C.o1,C.tixB,C.mp,C.pass,C.orange][i%5]), i*170);
   state.wave++; state.waveDrops=0; state.lvlSpawnCount=0;
   state.waveTotal=ECO.BASE_WAVE_DROPS+state.wave*ECO.WAVE_DROP_SCALE; updateWaveBar();
@@ -678,7 +696,7 @@ function triggerGameOver(){
     `You reached <b style="color:${C.orange}">Level ${state.wave}</b> of ${ECO.MAX_LEVEL}.<br>`+
     (lost>0
       ? `<span style="color:var(--muted)">Lost this run: 🎟 ${lost} — cash out next time!</span>`
-      : `<span style="color:var(--muted)">No tickets yet — tickets start at Level 5.</span>`);
+      : `<span style="color:var(--muted)">No tickets banked — they're chance drops, keep going!</span>`);
   document.getElementById('gameover').classList.add('flex');
 }
 function restartGame(keepBanked){
@@ -785,8 +803,8 @@ function pulseStat(id){ const el=document.getElementById(id); if(!el) return; el
 // ════════════════════════════════════════════════════════════
 document.getElementById('restartBtn').addEventListener('click',()=>restartGame(false));
 document.getElementById('winRestart').addEventListener('click',()=>restartGame(true));
-document.getElementById('bwCashout').addEventListener('click',()=>{ state.bankedTIX+=state.tix; state.bankedMP+=state.mp; document.getElementById('bigwin').classList.remove('flex'); popPause('bigwin'); restartGame(true); });
-document.getElementById('bwContinue').addEventListener('click',()=>{ document.getElementById('bigwin').classList.remove('flex'); popPause('bigwin'); });
+document.getElementById('bwCashout').addEventListener('click',()=>{ if(!state.bwArmed) return; state.bankedTIX+=state.tix; state.bankedMP+=state.mp; document.getElementById('bigwin').classList.remove('flex'); popPause('bigwin'); restartGame(true); });
+document.getElementById('bwContinue').addEventListener('click',()=>{ if(!state.bwArmed) return; document.getElementById('bigwin').classList.remove('flex'); popPause('bigwin'); });
 document.getElementById('raffleOk').addEventListener('click',()=>{
   document.getElementById('raffleOverlay').classList.remove('flex'); popPause('raffle');
   if(state.raffleThenWin){ state.raffleThenWin=false; triggerWin(); }
