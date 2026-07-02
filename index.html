@@ -440,9 +440,9 @@ const ECO = {
   RAFFLE_LEVEL:7, RAFFLE_CHANCE:0.07,             // pass: each of the 2 final bosses rolls 7% (~13.5%/run) — target ~250/500 over a month
 };
 // 10 finite levels. Multi-boss waves (see BOSSES_PER_WAVE). PER-BOSS HP tuned so each WAVE ≈ 100 shots on the power curve below.
-const BOSS_HP          = [0, 200, 150, 400, 1250, 2500, 1250, 2500, 1250, 2500, 833];  // PER BOSS, index by level 1..10
-// Deterministic power per LEVEL: guns 2→5 (L1-4, +×5 dmg on L4), then dmg ×5 (L4-10). Multiplier carries over (never drops).
-const POWER            = [null,{g:2,d:1},{g:3,d:1},{g:4,d:1},{g:5,d:5},{g:5,d:5},{g:5,d:5},{g:5,d:5},{g:5,d:5},{g:5,d:5},{g:5,d:5}];
+const BOSS_HP          = [0, 200, 150, 400, 750, 4500, 6750, 40500, 60750, 364500, 364500];  // PER BOSS, index by level 1..10
+// Power per LEVEL: guns 2→5 (L1-4), then damage COMPOUNDS ×3 each level L4-10 (d = cumulative 3,9,27…2187). Never drops.
+const POWER            = [null,{g:2,d:1},{g:3,d:1},{g:4,d:1},{g:5,d:3},{g:5,d:9},{g:5,d:27},{g:5,d:81},{g:5,d:243},{g:5,d:729},{g:5,d:2187}];
 function powerFor(w){ return POWER[Math.min(w, ECO.MAX_LEVEL)]; }
 function bossHpForWave(w){ return BOSS_HP[Math.min(w, ECO.MAX_LEVEL)]; }
 
@@ -628,7 +628,7 @@ function rewardPrize(p){
     explodeMP(p.x,p.y,C.mp,10+gain*2);
   } else {   // boost box
     const tgt=powerFor(state.wave); const gotGun=tgt.g>state.guns;
-    state.guns=Math.max(state.guns,tgt.g); state.dmg=Math.max(state.dmg,tgt.d);   // snap to this level's power tier
+    state.guns=Math.max(state.guns,tgt.g); state.dmg=Math.max(state.dmg,tgt.d);   // snap up to this level's power tier (never drops)
     if(gotGun){ txt='+CANNON'; showToast('🔫 '+state.guns+' CANNONS', C.orange, 28); explodeMP(p.x,p.y,C.orange,34); }
     else { txt='DMG ×'+state.dmg; showToast('⚡ DAMAGE ×'+state.dmg, C.orange, 28); explodeMP(p.x,p.y,C.orange,42); }
   }
