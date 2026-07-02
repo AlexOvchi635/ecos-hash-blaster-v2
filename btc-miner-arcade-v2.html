@@ -440,7 +440,7 @@ const ECO = {
   RAFFLE_LEVEL:7, RAFFLE_CHANCE:0.07,             // pass: each of the 2 final bosses rolls 7% (~13.5%/run) — target ~250/500 over a month
 };
 // 10 finite levels. Multi-boss waves (see BOSSES_PER_WAVE). PER-BOSS HP tuned so each WAVE ≈ 100 shots on the power curve below.
-const BOSS_HP          = [0, 200, 150, 400, 1500, 20000, 100000, 1000000, 1000000, 7000000, 7000000];  // PER BOSS (manual), index by level 1..10
+const BOSS_HP          = [0, 200, 150, 400, 1500, 20000, 100000, 1300000, 1500000, 8000000, 10000000];  // PER BOSS (manual), index by level 1..10
 // Power per LEVEL: guns 2→5 (L1-4), then damage COMPOUNDS: ×10 (L4-6), ×3 (L7-10) → d = cumulative 10,100,1000,3000,9000,27000,81000. Never drops.
 const POWER            = [null,{g:2,d:1},{g:3,d:1},{g:4,d:1},{g:5,d:10},{g:5,d:100},{g:5,d:1000},{g:5,d:3000},{g:5,d:9000},{g:5,d:27000},{g:5,d:81000}];
 function powerFor(w){ return POWER[Math.min(w, ECO.MAX_LEVEL)]; }
