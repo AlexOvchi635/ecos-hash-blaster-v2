@@ -131,16 +131,46 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .box h2{color:var(--ink);font-size:23px;margin-bottom:8px;letter-spacing:-.01em;}
 .box p{font-size:14px;line-height:1.55;color:var(--text);}
 .box .risk-line{margin-top:8px;font-size:12px;color:var(--red);}
-.win-reward{margin-top:10px;font-size:18px;font-weight:800;color:var(--ink);}
-.win-reward b{color:var(--tix);font-size:22px;}
-.win-reward--pass{margin-top:6px;font-size:15px;color:var(--pass);font-weight:800;}
 .btn-row{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap;}
 .btn-cta{background:var(--cta);color:var(--ink-btn);border:0;padding:11px 18px;border-radius:12px;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 6px 16px rgba(234,88,12,.28);}
 .btn-cta:active{transform:scale(.97);}
 .btn-ghost{background:#f3f4f6;color:var(--text);border:1px solid var(--line);padding:11px 18px;border-radius:12px;font-weight:800;font-size:13px;cursor:pointer;}
 .btn-ghost:active{transform:scale(.97);}
-.btn-danger{background:var(--cta);color:var(--ink-btn);border:0;padding:11px 24px;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;margin-top:14px;box-shadow:0 6px 16px rgba(234,88,12,.26);}
 @keyframes cardIn{from{transform:scale(.92);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+/* ═══ END CARDS (level clear / win / death) ═══ */
+.end-card{width:340px;padding:26px 24px 22px;}
+.end-icon{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;
+  width:86px;height:86px;margin:0 auto 10px;font-size:44px;border-radius:50%;
+  background:radial-gradient(circle at 50% 38%,#fff7ed,#ffedd5 78%);
+  border:1px solid #fed7aa;
+  box-shadow:0 0 0 6px rgba(234,88,12,.08),0 0 34px rgba(234,88,12,.3),0 10px 22px rgba(15,23,42,.12);
+  animation:iconFloat 2.6s ease-in-out infinite;
+}
+.end-icon--win{background:radial-gradient(circle at 50% 38%,#fefce8,#fef3c7 78%);border-color:#fde68a;box-shadow:0 0 0 6px rgba(202,138,4,.1),0 0 44px rgba(234,179,8,.45),0 10px 22px rgba(15,23,42,.12);}
+.end-icon--dead{background:radial-gradient(circle at 50% 38%,#fef2f2,#fee2e2 78%);border-color:#fecaca;box-shadow:0 0 0 6px rgba(220,38,38,.07),0 0 26px rgba(220,38,38,.22),0 10px 22px rgba(15,23,42,.12);animation:none;}
+@keyframes iconFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.end-title{font-size:26px;margin:2px 0 6px;letter-spacing:-.02em;color:var(--orange);}
+.end-title--win{color:var(--green);}
+.end-title--dead{color:var(--ink);}
+.end-grats{font-size:14px;color:var(--muted);margin:0 0 2px;line-height:1.5;}
+.earn-banner{
+  margin:12px auto 2px;display:inline-block;padding:10px 20px;border-radius:14px;
+  font-size:22px;font-weight:900;color:var(--tix);
+  background:#fefce8;border:1px solid #fde68a;
+  box-shadow:0 6px 18px rgba(202,138,4,.18);
+  animation:earnPop .45s cubic-bezier(.2,1.4,.3,1);
+}
+.earn-banner--none{color:var(--muted);background:#f8fafc;border-color:var(--line);box-shadow:none;font-size:14px;font-weight:700;padding:8px 16px;}
+@keyframes earnPop{0%{transform:scale(.4);opacity:0;}70%{transform:scale(1.12);}100%{transform:scale(1);opacity:1;}}
+.stat-pills{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap;}
+.stat-pills .pill{display:flex;flex-direction:column;gap:2px;min-width:92px;padding:8px 14px;border-radius:12px;background:#f8fafc;border:1px solid var(--line);}
+.stat-pills .pill span{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);}
+.stat-pills .pill b{font-size:16px;color:var(--ink);font-variant-numeric:tabular-nums;}
+.end-card--win{border-color:rgba(202,138,4,.45);box-shadow:0 0 60px rgba(234,179,8,.3),0 24px 48px rgba(15,23,42,.18);}
+.end-card--dead{border-color:rgba(220,38,38,.3);box-shadow:0 0 44px rgba(220,38,38,.14),0 24px 48px rgba(15,23,42,.18);animation:cardIn .3s cubic-bezier(.2,.8,.2,1),shakeX .5s .25s;}
+@keyframes shakeX{0%,100%{transform:translateX(0);}20%{transform:translateX(-7px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(2px);}}
 
 /* ═══ RAFFLE REVEAL ═══ */
 #raffleOverlay{z-index:40;}
@@ -176,7 +206,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   font-size:13px;font-weight:700;color:#5b21b6;
 }
 .pass-tally b{font-size:18px;color:var(--pass);font-variant-numeric:tabular-nums;}
-#confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+#confetti,.confetti-host{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
 .confetti-bit{position:absolute;top:-12px;width:8px;height:12px;border-radius:2px;opacity:.95;animation:confFall linear forwards;}
 @keyframes confFall{to{transform:translateY(110vh) rotate(640deg);opacity:.25;}}
 
@@ -296,12 +326,19 @@ body.shake{animation:shake .12s linear infinite;}
 
 <!-- Wave clear -->
 <div class="overlay" id="bigwin">
-  <div class="box">
+  <div class="confetti-host" id="confettiBw"></div>
+  <div class="box end-card">
+    <span class="end-icon" id="bwIcon">🎉</span>
     <div class="box__eyebrow" id="bwEyebrow">LEVEL CLEARED</div>
-    <h2 id="bwTitle">Level clear</h2>
-    <p id="bwText"></p>
+    <h2 class="end-title" id="bwTitle">BOSS DOWN!</h2>
+    <p class="end-grats" id="bwGrats">That boss never stood a chance.</p>
+    <div class="earn-banner" id="bwEarn">+1 🎟</div>
+    <div class="stat-pills">
+      <div class="pill"><span>🎟 this run</span><b id="bwTixTotal">0</b></div>
+      <div class="pill"><span>next up</span><b id="bwNext">Lvl 2/10</b></div>
+    </div>
     <div class="btn-row">
-      <button class="btn-cta" id="bwContinue">Next level</button>
+      <button class="btn-cta" id="bwContinue">Next level →</button>
       <button class="btn-ghost" id="bwCashout">Bank &amp; exit</button>
     </div>
   </div>
@@ -309,12 +346,17 @@ body.shake{animation:shake .12s linear infinite;}
 
 <!-- Win screen -->
 <div class="overlay" id="winScreen">
-  <div class="box" style="border-color:rgba(22,163,74,.5);box-shadow:0 0 60px rgba(22,163,74,.28),0 24px 48px rgba(0,0,0,.14);">
-    <div class="box__eyebrow" style="color:var(--green);">All 10 levels cleared</div>
-    <span class="pass-icon">🏆</span>
-    <h2 style="color:var(--green);">You win!</h2>
-    <p>You beat every boss. Rewards banked:</p>
-    <div class="win-reward">🎟 <b id="winTix">0</b> tickets</div>
+  <div class="confetti-host" id="confettiWin"></div>
+  <div class="box end-card end-card--win">
+    <span class="end-icon end-icon--win">🏆</span>
+    <div class="box__eyebrow" style="color:var(--green);">ALL 10 LEVELS CLEARED</div>
+    <h2 class="end-title end-title--win">CHAMPION!</h2>
+    <p class="end-grats">Every boss in the mine is down. Legendary run!</p>
+    <div class="earn-banner">🎟 <b id="winTix">0</b> banked</div>
+    <div class="stat-pills">
+      <div class="pill"><span>levels</span><b>10/10</b></div>
+      <div class="pill"><span>bosses down</span><b id="winBosses">16</b></div>
+    </div>
     <div class="btn-row"><button class="btn-cta" id="winRestart">Play again</button></div>
   </div>
 </div>
@@ -339,11 +381,16 @@ body.shake{animation:shake .12s linear infinite;}
 
 <!-- Game over -->
 <div class="overlay" id="gameover">
-  <div class="box">
-    <div class="box__eyebrow" style="color:var(--red);">Run ended</div>
-    <h2>Game over</h2>
-    <p id="goText"></p>
-    <button class="btn-danger" id="restartBtn">Play again</button>
+  <div class="box end-card end-card--dead">
+    <span class="end-icon end-icon--dead">💥</span>
+    <div class="box__eyebrow" style="color:var(--red);">RUN ENDED</div>
+    <h2 class="end-title end-title--dead">Game over</h2>
+    <p class="end-grats" id="goText"></p>
+    <div class="stat-pills">
+      <div class="pill"><span>reached</span><b id="goLvl">Lvl 1/10</b></div>
+      <div class="pill"><span>🎟 lost</span><b id="goTix">0</b></div>
+    </div>
+    <div class="btn-row"><button class="btn-cta" id="restartBtn">Try again</button></div>
   </div>
 </div>
 
@@ -670,12 +717,18 @@ function onWaveCleared(){
   if(gain>0){ state.tix+=gain; state.totalTIXEarned+=gain; }
   if(state.wave>=ECO.MAX_LEVEL){ triggerWin(); return; }
   const tier=bossTiers[Math.min(bossTiers.length-1,state.wave-1)];
-  document.getElementById('bwEyebrow').textContent=tier.name+' CLEARED · Lvl '+state.wave+'/'+ECO.MAX_LEVEL;
-  document.getElementById('bwTitle').textContent='Level '+state.wave+' clear';
-  document.getElementById('bwText').innerHTML =
-    (gain>0 ? `🎟 <b>+${gain}</b> this level · ` : `No ticket this level · `)+
-    `total <b>${state.tix}</b> 🎟<br><span style="color:var(--muted);font-size:12px">Next: Level ${state.wave+1} of ${ECO.MAX_LEVEL}</span>`;
+  const GRATS_TITLE=['BOOM! BOSS DOWN!','CRUSHED IT!','UNSTOPPABLE!','SHARPSHOOTER!','ON FIRE! 🔥','FLAWLESS!'];
+  const GRATS_SUB=['That boss never stood a chance.','Clean takedown — keep the streak alive!','Your cannons are singing.','The mine fears you now.','Textbook demolition. Onwards!'];
+  document.getElementById('bwEyebrow').textContent=tier.name+' CLEARED · LVL '+state.wave+'/'+ECO.MAX_LEVEL;
+  document.getElementById('bwTitle').textContent=GRATS_TITLE[Math.floor(Math.random()*GRATS_TITLE.length)];
+  document.getElementById('bwGrats').textContent=GRATS_SUB[Math.floor(Math.random()*GRATS_SUB.length)];
+  const eb=document.getElementById('bwEarn');
+  if(gain>0){ eb.className='earn-banner'; eb.textContent='+'+gain+' 🎟'; }
+  else { eb.className='earn-banner earn-banner--none'; eb.textContent='No ticket this level — next one’s luckier'; }
+  document.getElementById('bwTixTotal').textContent=state.tix;
+  document.getElementById('bwNext').textContent='Lvl '+(state.wave+1)+'/'+ECO.MAX_LEVEL;
   document.getElementById('bigwin').classList.add('flex'); pushPause('bigwin');
+  fireConfetti('confettiBw',36);
   state.bwArmed=false; setTimeout(()=>{ state.bwArmed=true; },800);    // ignore stray shooting taps for 0.8s
   for(let i=0;i<8;i++) setTimeout(()=>spawnFirework(rand(W*.18,W*.82),rand(H*.22,H*.5),[C.o1,C.tixB,C.mp,C.pass,C.orange][i%5]), i*170);
   state.wave++; state.waveDrops=0; state.lvlSpawnCount=0;
@@ -687,7 +740,9 @@ function triggerWin(){
   if(state.gameOver) return; state.gameOver=true;
   state.bankedTIX+=state.tix; state.bankedMP+=state.mp;
   document.getElementById('winTix').textContent=state.tix;
+  document.getElementById('winBosses').textContent=state.bossesKilledThisRun;
   document.getElementById('winScreen').classList.add('flex'); pushPause('win');
+  fireConfetti('confettiWin',60);
   for(let i=0;i<16;i++) setTimeout(()=>spawnFirework(rand(W*.1,W*.9),rand(H*.15,H*.55),[C.o1,C.tixB,C.mp,C.pass,C.green][i%5]), i*140);
 }
 
@@ -697,11 +752,11 @@ function endBossEscape(){ if(state.bosses.length===0) return; showToast('BOSS ES
 function triggerGameOver(){
   if(state.gameOver) return; state.gameOver=true;
   const lost=state.tix;   // unbanked run tickets are lost
-  document.getElementById('goText').innerHTML=
-    `You reached <b style="color:${C.orange}">Level ${state.wave}</b> of ${ECO.MAX_LEVEL}.<br>`+
-    (lost>0
-      ? `<span style="color:var(--muted)">Lost this run: 🎟 ${lost} — cash out next time!</span>`
-      : `<span style="color:var(--muted)">No tickets banked — they're chance drops, keep going!</span>`);
+  document.getElementById('goLvl').textContent='Lvl '+state.wave+'/'+ECO.MAX_LEVEL;
+  document.getElementById('goTix').textContent=lost;
+  document.getElementById('goText').textContent= lost>0
+    ? 'So close! Bank your tickets on a level-clear screen next run.'
+    : 'Every run sharpens your aim — go again!';
   document.getElementById('gameover').classList.add('flex');
 }
 function restartGame(keepBanked){
@@ -795,11 +850,12 @@ function revealResult(win){
     card.classList.add('show');
   }
 }
-function fireConfetti(){
-  const box=document.getElementById('confetti'); box.innerHTML='';
+function fireConfetti(hostId,count){
+  const box=document.getElementById(hostId||'confetti'); if(!box) return; box.innerHTML='';
   const cols=['#ca8a04','#7c3aed','#2563eb','#f97316','#16a34a'];
-  for(let i=0;i<26;i++){ const b=document.createElement('div'); b.className='confetti-bit'; b.style.left=rand(4,96)+'%'; b.style.background=cols[i%cols.length]; b.style.animationDuration=rand(1.0,1.8)+'s'; b.style.animationDelay=rand(0,.3)+'s'; box.appendChild(b); }
-  setTimeout(()=>{box.innerHTML='';},2200);
+  const n=count||26;
+  for(let i=0;i<n;i++){ const b=document.createElement('div'); b.className='confetti-bit'; b.style.left=rand(4,96)+'%'; b.style.background=cols[i%cols.length]; b.style.animationDuration=rand(1.0,1.9)+'s'; b.style.animationDelay=rand(0,.45)+'s'; box.appendChild(b); }
+  setTimeout(()=>{box.innerHTML='';},2600);
 }
 function pulseStat(id){ const el=document.getElementById(id); if(!el) return; el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),140); }
 
