@@ -222,6 +222,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 }
 .pass-tally b{font-size:18px;color:var(--pass);font-variant-numeric:tabular-nums;}
 #confetti,.confetti-host{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.confetti-host--front{z-index:6;}
+.fw-dot{position:absolute;width:7px;height:7px;border-radius:50%;pointer-events:none;opacity:.95;animation:fwFly .9s ease-out forwards;box-shadow:0 0 8px currentColor;}
+@keyframes fwFly{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0;}}
 .confetti-bit{position:absolute;top:-12px;width:8px;height:12px;border-radius:2px;opacity:.95;animation:confFall linear forwards;}
 @keyframes confFall{to{transform:translateY(110vh) rotate(640deg);opacity:.25;}}
 
@@ -357,6 +360,7 @@ body.shake{animation:shake .12s linear infinite;}
       <button class="btn-ghost" id="bwCashout">Bank &amp; exit</button>
     </div>
   </div>
+  <div class="confetti-host confetti-host--front" id="confettiBwFront"></div>
 </div>
 
 <!-- Win screen -->
@@ -374,6 +378,7 @@ body.shake{animation:shake .12s linear infinite;}
     </div>
     <div class="btn-row"><button class="btn-cta" id="winRestart">Play again</button></div>
   </div>
+  <div class="confetti-host confetti-host--front" id="confettiWinFront"></div>
 </div>
 
 <!-- Raffle reveal -->
@@ -743,7 +748,7 @@ function onWaveCleared(){
   document.getElementById('bwTixTotal').textContent=state.tix;
   document.getElementById('bwNext').textContent='Lvl '+(state.wave+1)+'/'+ECO.MAX_LEVEL;
   document.getElementById('bigwin').classList.add('flex'); pushPause('bigwin');
-  fireConfetti('confettiBw',36);
+  fireConfetti('confettiBw',36); fireConfetti('confettiBwFront',18); fwBursts('confettiBwFront',4);
   state.bwArmed=false; setTimeout(()=>{ state.bwArmed=true; },800);    // ignore stray shooting taps for 0.8s
   for(let i=0;i<8;i++) setTimeout(()=>spawnFirework(rand(W*.18,W*.82),rand(H*.22,H*.5),[C.o1,C.tixB,C.mp,C.pass,C.orange][i%5]), i*170);
   state.wave++; state.waveDrops=0; state.lvlSpawnCount=0;
@@ -757,7 +762,7 @@ function triggerWin(){
   document.getElementById('winTix').textContent=state.tix;
   document.getElementById('winBosses').textContent=state.bossesKilledThisRun;
   document.getElementById('winScreen').classList.add('flex'); pushPause('win');
-  fireConfetti('confettiWin',60);
+  fireConfetti('confettiWin',60); fireConfetti('confettiWinFront',24); fwBursts('confettiWinFront',6);
   for(let i=0;i<16;i++) setTimeout(()=>spawnFirework(rand(W*.1,W*.9),rand(H*.15,H*.55),[C.o1,C.tixB,C.mp,C.pass,C.green][i%5]), i*140);
 }
 
@@ -871,6 +876,22 @@ function fireConfetti(hostId,count){
   const n=count||26;
   for(let i=0;i<n;i++){ const b=document.createElement('div'); b.className='confetti-bit'; b.style.left=rand(4,96)+'%'; b.style.background=cols[i%cols.length]; b.style.animationDuration=rand(1.0,1.9)+'s'; b.style.animationDelay=rand(0,.45)+'s'; box.appendChild(b); }
   setTimeout(()=>{box.innerHTML='';},2600);
+}
+function fwBursts(hostId,count){   // DOM firework bursts (used on the FRONT layer, above the card)
+  const box=document.getElementById(hostId); if(!box) return;
+  const cols=['#f97316','#eab308','#2563eb','#16a34a','#7c3aed'];
+  for(let b=0;b<count;b++){
+    setTimeout(()=>{
+      const cx=rand(12,88), cy=rand(15,72), col=cols[Math.floor(Math.random()*cols.length)];
+      for(let i=0;i<16;i++){
+        const d=document.createElement('div'); d.className='fw-dot';
+        const a=Math.random()*Math.PI*2, r=rand(45,120);
+        d.style.left=cx+'%'; d.style.top=cy+'%'; d.style.background=col; d.style.color=col;
+        d.style.setProperty('--dx',Math.cos(a)*r+'px'); d.style.setProperty('--dy',Math.sin(a)*r+'px');
+        box.appendChild(d); setTimeout(()=>d.remove(),1000);
+      }
+    }, b*280);
+  }
 }
 function pulseStat(id){ const el=document.getElementById(id); if(!el) return; el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),140); }
 
