@@ -222,6 +222,21 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 @keyframes shake{0%,100%{transform:translate(0,0)}25%{transform:translate(-3px,2px)}50%{transform:translate(2px,-3px)}75%{transform:translate(-2px,-2px)}}
 body.shake{animation:shake .12s linear infinite;}
 
+/* ═══ DEV PANEL (screen navigator — testing only) ═══ */
+.dev-panel{position:fixed;bottom:10px;right:10px;z-index:50;font-family:-apple-system,sans-serif;}
+.dev-panel__fab{display:none;background:rgba(15,23,42,.9);color:#fbbf24;border:1px solid rgba(251,191,36,.45);border-radius:8px;padding:6px 10px;font-size:10px;font-weight:900;letter-spacing:.06em;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.35);}
+.dev-panel.collapsed .dev-panel__fab{display:block;}
+.dev-panel.collapsed .dev-panel__body{display:none;}
+.dev-panel__body{width:186px;background:rgba(15,23,42,.94);border:1px solid rgba(251,191,36,.32);border-radius:12px;padding:9px;box-shadow:0 12px 28px rgba(0,0,0,.45);backdrop-filter:blur(8px);}
+.dev-panel__head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.dev-panel__title{font-size:9px;font-weight:900;letter-spacing:.08em;color:#fbbf24;text-transform:uppercase;}
+.dev-panel__min{width:18px;height:18px;border:0;border-radius:5px;background:rgba(255,255,255,.12);color:#fff;font-size:13px;line-height:1;cursor:pointer;}
+.dev-sec{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#7d8aa0;margin:7px 0 3px;}
+.dev-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;}
+.dev-grid.wide{grid-template-columns:repeat(2,1fr);}
+.dev-grid button{border:0;border-radius:6px;padding:6px 2px;background:rgba(255,255,255,.1);color:#e2e8f0;font-size:9px;font-weight:800;cursor:pointer;letter-spacing:.01em;}
+.dev-grid button:hover{background:rgba(251,191,36,.28);color:#fff;}
+.dev-grid button:active{transform:scale(.94);}
 </style>
 </head>
 <body>
@@ -310,6 +325,27 @@ body.shake{animation:shake .12s linear infinite;}
 </div>
 
 <div id="help" style="display:none;"></div>
+
+<!-- DEV PANEL (testing navigation only) -->
+<div class="dev-panel collapsed" id="devPanel">
+  <button class="dev-panel__fab" id="devFab">⚙ DEV</button>
+  <div class="dev-panel__body">
+    <div class="dev-panel__head">
+      <span class="dev-panel__title">⚙ Dev · screens</span>
+      <button class="dev-panel__min" id="devMin">–</button>
+    </div>
+    <div class="dev-sec">Jump to level</div>
+    <div class="dev-grid" id="devLevels"></div>
+    <div class="dev-sec">Screens</div>
+    <div class="dev-grid wide">
+      <button data-dev="start">Start</button>
+      <button data-dev="boss">Spawn boss</button>
+      <button data-dev="clear">Clear modal</button>
+      <button data-dev="win">Win screen</button>
+      <button data-dev="death">Death screen</button>
+    </div>
+  </div>
+</div>
 
 <!-- START SCREEN -->
 <div class="start-screen" id="startScreen">
@@ -920,6 +956,42 @@ document.getElementById('startBtn').addEventListener('click',function(){
   popPause('start');
   setTimeout(()=>{ const h=document.getElementById('help'); if(h) h.style.opacity='0'; }, 9000);
 });
+// ════════════════════════════════════════════════════════════
+// DEV PANEL — jump to any level / screen (testing only, no cheats)
+// ════════════════════════════════════════════════════════════
+(function devInit(){
+  const panel=document.getElementById('devPanel');
+  document.getElementById('devFab').onclick=()=>panel.classList.remove('collapsed');
+  document.getElementById('devMin').onclick=()=>panel.classList.add('collapsed');
+  const lv=document.getElementById('devLevels'); let h='';
+  for(let i=1;i<=ECO.MAX_LEVEL;i++) h+='<button data-lvl="'+i+'">L'+i+'</button>';
+  lv.innerHTML=h;
+  function hideAll(){
+    ['bigwin','winScreen','gameover'].forEach(id=>document.getElementById(id).classList.remove('flex'));
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('warning').style.display='none';
+    document.body.classList.remove('shake');
+  }
+  function goLevel(n){
+    hideAll(); clearPauses(); state.gameOver=false;
+    state.wave=n; state.waveDrops=0; state.lvlSpawnCount=0; state.waveTotal=ECO.BASE_WAVE_DROPS+n*ECO.WAVE_DROP_SCALE;
+    { const pw=powerFor(n); state.guns=pw.g; state.dmg=pw.d; }   // deterministic power for that level
+    state.mp=9999; state.tix=0;
+    state.hashes=[]; state.prizes=[]; state.bosses=[]; state.particles=[]; state.floaters=[];
+    state.bossActive=false; state.bossPending=false; state.nextSpawnT=0.4; state.combo=0;
+    updateWaveBar();
+  }
+  lv.addEventListener('click',e=>{ const b=e.target.closest('[data-lvl]'); if(b) goLevel(+b.dataset.lvl); });
+  panel.querySelector('.dev-panel__body').addEventListener('click',e=>{
+    const b=e.target.closest('[data-dev]'); if(!b) return; const a=b.dataset.dev;
+    if(a==='start'){ hideAll(); restartGame(false); document.getElementById('startScreen').classList.remove('hidden'); pushPause('start'); }
+    else if(a==='boss'){ hideAll(); clearPauses(); state.gameOver=false; state.bossActive=false; state.prizes=[]; state.mp=Math.max(state.mp,5000); actuallySpawnBoss(); }
+    else if(a==='clear'){ hideAll(); if(state.wave>=ECO.MAX_LEVEL) state.wave=ECO.MAX_LEVEL-1; state.tix=state.tix||2; state.bossActive=true; onWaveCleared(); }
+    else if(a==='win'){ hideAll(); state.gameOver=false; state.wave=ECO.MAX_LEVEL; state.tix=state.tix||5; triggerWin(); }
+    else if(a==='death'){ hideAll(); state.gameOver=false; triggerGameOver(); }
+  });
+})();
+
 updateWaveBar();
 requestAnimationFrame(loop);
 </script>
