@@ -335,7 +335,6 @@ body.shake{animation:shake .12s linear infinite;}
   <div class="stat mp" id="statMp">MP <b id="mp">0</b></div>
   <div class="stat tix" id="statTix">🎟 <b id="tix">0</b></div>
   <div class="stat wave">LVL <b id="wave">1</b></div>
-  <div class="stat burn" id="statBurn">🔥 <b id="burned">0</b></div>
 </div>
 
 <div id="ticketHint">🎟 Clear levels to earn tickets</div>
@@ -983,7 +982,6 @@ function update(dt){
   document.getElementById('mp').textContent=state.mp;
   document.getElementById('tix').textContent=state.tix;
   document.getElementById('wave').textContent=state.wave;
-  document.getElementById('burned').textContent=state.totalMPSpent;
   document.getElementById('statMp').classList.toggle('low', state.mp<100);
   if(state.tix>prevTix){ pulseStat('statTix'); } prevTix=state.tix;
 }
