@@ -361,6 +361,7 @@ body.shake{animation:shake .12s linear infinite;}
       <button data-dev="clear">Clear modal</button>
       <button data-dev="win">Win screen</button>
       <button data-dev="death">Death screen</button>
+      <button data-dev="noMp">No MP</button>
     </div>
   </div>
 </div>
@@ -1025,7 +1026,7 @@ document.getElementById('startBtn').addEventListener('click',function(){
   for(let i=1;i<=ECO.MAX_LEVEL;i++) h+='<button data-lvl="'+i+'">L'+i+'</button>';
   lv.innerHTML=h;
   function hideAll(){
-    ['bigwin','winScreen','gameover'].forEach(id=>document.getElementById(id).classList.remove('flex'));
+    ['bigwin','winScreen','gameover','noMpOverlay'].forEach(id=>document.getElementById(id).classList.remove('flex'));
     document.getElementById('startScreen').classList.add('hidden');
     document.getElementById('warning').style.display='none';
     document.body.classList.remove('shake');
@@ -1047,6 +1048,7 @@ document.getElementById('startBtn').addEventListener('click',function(){
     else if(a==='clear'){ hideAll(); if(state.wave>=ECO.MAX_LEVEL) state.wave=ECO.MAX_LEVEL-1; state.tix=state.tix||2; state.bossActive=true; onWaveCleared(); }
     else if(a==='win'){ hideAll(); state.gameOver=false; state.wave=ECO.MAX_LEVEL; state.tix=state.tix||5; triggerWin(); }
     else if(a==='death'){ hideAll(); state.gameOver=false; triggerGameOver(); }
+    else if(a==='noMp'){ hideAll(); clearPauses(); state.gameOver=false; state.mp=0; state.tix=state.tix||2; showNoMpOffer(); }
   });
 })();
 
