@@ -141,6 +141,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .end-card .btn-row{margin-top:18px;}
 .end-card .btn-cta{flex:1;min-width:150px;padding:15px 22px;font-size:15px;border-radius:16px;}
 .end-card .btn-ghost{padding:15px 20px;font-size:14px;border-radius:16px;}
+.no-mp-actions{flex-direction:column;align-items:stretch;}
+.no-mp-actions .btn-cta,.no-mp-actions .btn-ghost{width:100%;min-width:0;padding:15px 22px;font-size:15px;border-radius:16px;}
 @keyframes cardIn{from{transform:scale(.92);opacity:0;}to{transform:scale(1);opacity:1;}}
 
 /* ═══ END CARDS (level clear / win / death) ═══ */
@@ -329,15 +331,15 @@ body.shake{animation:shake .12s linear infinite;}
   <div class="box end-card">
     <span class="end-icon end-icon--dead">⛽</span>
     <div class="box__eyebrow" style="color:var(--orange);">OUT OF MP</div>
-    <h2 class="end-title">MP закончились</h2>
-    <p class="end-grats">Можно забрать уже заработанные билеты или докупить MP в магазине и продолжить ровно с этого момента.</p>
+    <h2 class="end-title">You are out of MP</h2>
+    <p class="end-grats">Buy more MP in the shop to continue from this exact moment, or claim the tickets you have already earned.</p>
     <div class="stat-pills">
       <div class="pill"><span>level</span><b id="noMpLvl">Lvl 1/10</b></div>
       <div class="pill"><span>🎟 this run</span><b id="noMpTix">0</b></div>
     </div>
-    <div class="btn-row">
-      <button class="btn-ghost" id="noMpClaim">Забрать награду</button>
-      <button class="btn-cta" id="noMpBuy">Докупить MP</button>
+    <div class="btn-row no-mp-actions">
+      <button class="btn-cta" id="noMpBuy">Buy MP</button>
+      <button class="btn-ghost" id="noMpClaim">Claim reward</button>
     </div>
   </div>
 </div>
@@ -683,7 +685,7 @@ function claimNoMpReward(){
 }
 async function buyMpAndResume(){
   const btn=document.getElementById('noMpBuy');
-  btn.disabled=true; btn.textContent='Открываем магазин...';
+  btn.disabled=true; btn.textContent='Opening shop...';
   let topup=ECO.SHOP_TOPUP_MP;
   try{
     if(window.ECOSHashBlaster && typeof window.ECOSHashBlaster.openMpShop==='function'){
@@ -699,7 +701,7 @@ async function buyMpAndResume(){
   }catch(e){
     showToast('SHOP ERROR', C.red, 24);
   }finally{
-    btn.disabled=false; btn.textContent='Докупить MP';
+    btn.disabled=false; btn.textContent='Buy MP';
   }
 }
 function restartGame(keepBanked){
