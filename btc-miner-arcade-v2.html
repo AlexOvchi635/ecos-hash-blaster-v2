@@ -324,6 +324,24 @@ body.shake{animation:shake .12s linear infinite;}
   </div>
 </div>
 
+<!-- Out of MP -->
+<div class="overlay" id="noMpOverlay">
+  <div class="box end-card">
+    <span class="end-icon end-icon--dead">⛽</span>
+    <div class="box__eyebrow" style="color:var(--orange);">OUT OF MP</div>
+    <h2 class="end-title">MP закончились</h2>
+    <p class="end-grats">Можно забрать уже заработанные билеты или докупить MP в магазине и продолжить ровно с этого момента.</p>
+    <div class="stat-pills">
+      <div class="pill"><span>level</span><b id="noMpLvl">Lvl 1/10</b></div>
+      <div class="pill"><span>🎟 this run</span><b id="noMpTix">0</b></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-ghost" id="noMpClaim">Забрать награду</button>
+      <button class="btn-cta" id="noMpBuy">Докупить MP</button>
+    </div>
+  </div>
+</div>
+
 <div id="help" style="display:none;"></div>
 
 <!-- DEV PANEL (testing navigation only) -->
@@ -377,6 +395,7 @@ window.addEventListener('pageshow', resize);
 const ECO = {
   SHOT_COST:1, FIRE_RATE_MS:85, GUN_MAX:5,       // max 4 cannons — then boxes give +1 damage (power)
   MAX_LEVEL:10, START_MP:2000,                     // standalone demo start; in loyalty = player's real MP balance
+  SHOP_TOPUP_MP:1000,                              // demo shop top-up; in loyalty this comes from the real store callback
   BASE_WAVE_DROPS:18, WAVE_DROP_SCALE:2,          // LONG levels — 30..54 blocks before the boss
   FALL_STEP:0.08,                                 // block fall speed +8% per level (ramps noticeably)
   MP_BOX_MIN:1, MP_BOX_MAX:3, SAT_MP:1,           // box returns 1–3 MP (mostly 1) — burn more MP
@@ -525,7 +544,7 @@ function actuallySpawnBoss(){
 function shootHash(tx,ty){
   const now=performance.now();
   if(now-state.lastShot<ECO.FIRE_RATE_MS) return;
-  if(state.mp<=0){ showToast('NO MP', C.red, 28); return; }
+  if(state.mp<ECO.SHOT_COST){ showNoMpOffer(); return; }
   state.mp-=ECO.SHOT_COST; state.totalMPSpent+=ECO.SHOT_COST; state.lastShot=now;
   const dx=tx-state.rig.x, dy=ty-state.rig.y; const sp=740;
   state.rig.angle=Math.atan2(dy,dx);
@@ -646,6 +665,42 @@ function triggerGameOver(){
     : 'Every run sharpens your aim — go again!';
   document.getElementById('gameover').classList.add('flex');
 }
+function showNoMpOffer(){
+  if(state.gameOver || state.paused) return;
+  showToast('NO MP', C.red, 28);
+  document.getElementById('noMpLvl').textContent='Lvl '+state.wave+'/'+ECO.MAX_LEVEL;
+  document.getElementById('noMpTix').textContent=state.tix;
+  document.getElementById('noMpOverlay').classList.add('flex');
+  pushPause('noMp');
+}
+function claimNoMpReward(){
+  state.bankedTIX+=state.tix;
+  state.bankedMP+=state.mp;
+  document.getElementById('noMpOverlay').classList.remove('flex');
+  popPause('noMp');
+  restartGame(true);
+}
+async function buyMpAndResume(){
+  const btn=document.getElementById('noMpBuy');
+  btn.disabled=true; btn.textContent='Открываем магазин...';
+  let topup=ECO.SHOP_TOPUP_MP;
+  try{
+    if(window.ECOSHashBlaster && typeof window.ECOSHashBlaster.openMpShop==='function'){
+      const result=await window.ECOSHashBlaster.openMpShop({level:state.wave,currentMp:state.mp,ticketsInRun:state.tix});
+      topup=Number(result && (result.mpAdded ?? result.mp ?? result));
+    }
+    if(!Number.isFinite(topup) || topup<=0){ showToast('MP NOT BOUGHT', C.red, 24); return; }
+    state.mp+=topup;
+    state.totalMPEarned+=topup;
+    document.getElementById('noMpOverlay').classList.remove('flex');
+    popPause('noMp');
+    showToast('+'+topup+' MP', C.mp, 28);
+  }catch(e){
+    showToast('SHOP ERROR', C.red, 24);
+  }finally{
+    btn.disabled=false; btn.textContent='Докупить MP';
+  }
+}
 function restartGame(keepBanked){
   if(!keepBanked){ state.bankedMP=0; state.bankedTIX=0; }
   state.mp=ECO.START_MP; state.tix=0; state.combo=0; state.comboTimer=0;
@@ -658,6 +713,7 @@ function restartGame(keepBanked){
   document.getElementById('gameover').classList.remove('flex');
   document.getElementById('bigwin').classList.remove('flex');
   document.getElementById('winScreen').classList.remove('flex');
+  document.getElementById('noMpOverlay').classList.remove('flex');
   document.getElementById('warning').style.display='none';
   document.getElementById('raffleOverlay').classList.remove('flex');
   document.body.classList.remove('shake'); updateWaveBar();
@@ -732,6 +788,8 @@ document.getElementById('restartBtn').addEventListener('click',()=>restartGame(f
 document.getElementById('winRestart').addEventListener('click',()=>restartGame(true));
 document.getElementById('bwCashout').addEventListener('click',()=>{ if(!state.bwArmed) return; state.bankedTIX+=state.tix; state.bankedMP+=state.mp; document.getElementById('bigwin').classList.remove('flex'); popPause('bigwin'); restartGame(true); });
 document.getElementById('bwContinue').addEventListener('click',()=>{ if(!state.bwArmed) return; document.getElementById('bigwin').classList.remove('flex'); popPause('bigwin'); });
+document.getElementById('noMpClaim').addEventListener('click',claimNoMpReward);
+document.getElementById('noMpBuy').addEventListener('click',buyMpAndResume);
 document.getElementById('raffleOk').addEventListener('click',()=>{
   document.getElementById('raffleOverlay').classList.remove('flex'); popPause('raffle');
   if(state.raffleThenWin){ state.raffleThenWin=false; triggerWin(); }
