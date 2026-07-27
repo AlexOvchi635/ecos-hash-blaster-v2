@@ -51,6 +51,12 @@
     .total td{font-weight:900;color:var(--orange);border-bottom:none;background:var(--orange-soft);}
     .callout{margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--orange-soft);border:1px solid var(--orange-line);color:#9a3412;font-size:13px;font-weight:600;line-height:1.5;}
     .callout.green{background:#f0fdf4;border-color:#bbf7d0;color:#166534;}
+    .spec{display:grid;gap:12px;margin-top:12px;}
+    .spec h3{margin:0 0 6px;font-size:14px;font-weight:900;letter-spacing:-.01em;}
+    .spec ul{margin:0;padding-left:18px;color:var(--ink);font-size:13px;}
+    .spec li{margin:5px 0;}
+    .spec code{font-family:"SFMono-Regular",Consolas,monospace;font-size:12px;background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:1px 5px;color:#334155;}
+    .spec pre{margin:8px 0 0;overflow-x:auto;background:#0f172a;color:#e2e8f0;border-radius:12px;padding:12px;font-size:12px;line-height:1.45;}
     .foot{text-align:center;margin-top:24px;color:var(--muted);font-size:13px;}
     .foot a{color:var(--orange);font-weight:800;text-decoration:none;}
     @media (max-width:560px){ .hero{grid-template-columns:1fr 1fr;} .prog{grid-template-columns:repeat(5,1fr);} .head h1{font-size:26px;} }
@@ -122,6 +128,83 @@
       </table>
       </div>
       <div class="callout green">Забег тратит <b>~<span id="grossBurn2">—</span> MP</b> и возвращает часть на блоках → <b>чистый слив ~<span id="netBurn2">—</span> MP</b>. Новичок в кликере зарабатывает <b>~50–300 MP/день</b> — один забег съедает около дня дохода. <b>Кликер копит — игра тратит.</b></div>
+    </div>
+
+    <div class="card">
+      <h2>🧩 ТЗ для интеграции в систему лояльности</h2>
+      <p class="sub">Цель: встроить Hash Blaster как мини-игру внутри сайта/личного кабинета ECOS Loyalty, где MP — реальная валюта лояльности, а билеты начисляются только после серверной валидации забега.</p>
+
+      <div class="spec">
+        <section>
+          <h3>1. Точка входа</h3>
+          <ul>
+            <li>Игра открывается из раздела Loyalty по кнопке <code>Play Hash Blaster</code>.</li>
+            <li>Перед стартом фронт запрашивает у backend актуальные <code>userId</code>, <code>mpBalance</code>, <code>runNonce</code>, лимиты дня и конфиг экономики.</li>
+            <li>Если у пользователя недостаточно MP для старта, игра не запускается: показать экран пополнения/заработка MP.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>2. Сервер — источник правды</h3>
+          <ul>
+            <li>Клиент не должен сам финально списывать MP или начислять билеты. Он только отправляет события забега.</li>
+            <li>Backend считает итог: сколько MP потрачено на выстрелы, сколько MP получено с синих блоков, сколько билетов заработано, сгорели ли билеты при смерти.</li>
+            <li>Все правила баланса должны лежать в одном конфиге на сервере: <code>bossHp</code>, <code>bossesPerLevel</code>, <code>powerCurve</code>, <code>ticketRules</code>, стоимость выстрела.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>3. Минимальные API</h3>
+          <pre>{
+  "GET /api/loyalty/hash-blaster/config": "вернуть баланс v2 и публичную версию конфига",
+  "POST /api/loyalty/hash-blaster/runs/start": "создать runId, runNonce, зафиксировать стартовый MP",
+  "POST /api/loyalty/hash-blaster/runs/{runId}/events": "батч событий: shot, box_hit, boss_hit, level_clear, death, bank_exit",
+  "POST /api/loyalty/hash-blaster/runs/{runId}/finish": "сервер валидирует забег и возвращает финальный MP/tickets"
+}</pre>
+        </section>
+
+        <section>
+          <h3>4. События, которые игра отправляет</h3>
+          <ul>
+            <li><code>shot</code>: время, уровень, координаты, цена <code>1 MP</code>.</li>
+            <li><code>box_hit</code>: тип блока, награда/штраф MP, позиция, timestamp.</li>
+            <li><code>boss_hit</code>: уровень, bossIndex, урон, оставшийся HP.</li>
+            <li><code>level_clear</code>: уровень, результат roll билетов, текущие билеты забега.</li>
+            <li><code>death</code>: причина смерти, достигнутый уровень, билеты к сгоранию.</li>
+            <li><code>bank_exit</code>: пользователь забрал билеты после завершения уровня.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>5. Правила экономики v2</h3>
+          <ul>
+            <li>Стоимость выстрела: <code>1 MP</code>.</li>
+            <li>HP боссов по уровням: <code>[150, 110, 250, 1400, 20000, 100000, 500000, 1000000, 6000000, 5500000]</code>.</li>
+            <li>Количество боссов: <code>[1, 2, 1, 2, 1, 2, 1, 2, 1, 3]</code>.</li>
+            <li>Билеты начисляются один раз за уровень. До банковки они находятся под риском: смерть сжигает билеты текущего забега.</li>
+            <li><code>Bank &amp; exit</code> доступен только на экране завершения уровня. После банковки билеты становятся постоянными.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>6. Античит и ограничения</h3>
+          <ul>
+            <li>Каждый забег подписывать через <code>runNonce</code>; повторный finish для одного <code>runId</code> запрещён.</li>
+            <li>Сервер проверяет невозможные значения: слишком много выстрелов в секунду, отрицательные траты, урон выше power curve, пропущенные уровни.</li>
+            <li>Хранить полный журнал итоговых событий минимум для спорных забегов и топовых результатов.</li>
+            <li>Добавить дневные лимиты по забегам/билетам, чтобы игра не ломала экономику лояльности.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>7. UX в реальной системе</h3>
+          <ul>
+            <li>В HUD показывать реальный MP-баланс пользователя и билеты забега отдельно от уже сохранённых билетов.</li>
+            <li>После завершения забега показывать серверный итог: MP списано, MP найдено, чистый расход, билеты начислены/сгорели.</li>
+            <li>При потере сети ставить игру на паузу и не позволять завершить забег без синхронизации с backend.</li>
+          </ul>
+        </section>
+      </div>
     </div>
 
     <div class="foot">Отдельная версия v2 (без ассетов, 10 уровней, без пасса) · <a href="btc-miner-arcade-v2.html">▶ Играть</a></div>
